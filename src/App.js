@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
 import fire from './fire';
 import Select from 'react-select';
-import './App.css';
+import './App.scss';
+import BarChart from './components/BarChart';
+import { GithubPicker } from 'react-color';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = { 
+      colors: {},
       players: {}, 
       matchs: [], 
       playersSelect: [],
+      teamRanked: {},
       selectedOption: null,
       datetime: `${new Date().getFullYear()}-${`${new Date().getMonth() +
         1}`.padStart(2, 0)}-${`${new Date().getDay() + 1}`.padStart(
@@ -27,9 +31,19 @@ class App extends Component {
     playersRef.on('child_added', snapshot => {
       /* Update React state when player is added at Firebase Database */
       let players = Object.assign({}, this.state.players); 
-      players[snapshot.key] = { data: snapshot.val(), id: snapshot.key };
+      let teamRanked = Object.assign({}, this.state.teamRanked); 
+      let colors = Object.assign({}, this.state.colors); 
       const playerSelect = { value: snapshot.key, label: snapshot.val().Name };
+      
+      colors[snapshot.key] = snapshot.val().Color;
+
+      players[snapshot.key] = { data: snapshot.val(), id: snapshot.key, ranking: [] };
+      
+      teamRanked[snapshot.key] = [];
+
       this.setState({ 
+        colors: colors,
+        teamRanked: teamRanked,
         players: players,
         playersSelect: [playerSelect].concat(this.state.playersSelect),
       });
@@ -54,8 +68,6 @@ class App extends Component {
           rankPlayerB = rankPlayerB+1;
           if (playerA !== playerB && playerAlreadyRanked.includes(playerB)) {
             let players = Object.assign({}, this.state.players); 
-            let matchs = Object.assign({}, this.state.matchs); 
-
 
             const misePlayerA = ratio * this.state.players[playerA].data.Score;
             const misePlayerB = ratio * this.state.players[playerB].data.Score;
@@ -72,16 +84,35 @@ class App extends Component {
               players: players
             });
 
-            // console.log(snapshot.val().Date, rankPlayerA, this.state.players[playerA].data.Name, this.state.players[playerA].data.Score, 'vs', rankPlayerB, this.state.players[playerB].data.Name, this.state.players[playerB].data.Score);
           }
         });
+
+        let tempRank = [];
+
+        Object.keys(this.state.players).forEach(key => {
+          tempRank.push({
+            id: key,
+            score: this.state.players[key].data.Score
+          });
+        });
+
+        let i = 0;
+        let teamRanked = Object.assign({}, this.state.teamRanked); 
+
+        tempRank.sort((a, b) => a.score - b.score).reverse().forEach(item => {
+          i++;
+          teamRanked[item.id].push(i);
+        });
+
+        this.setState({ teamRanked: teamRanked });
+
         match.Results.push({
           id: playerA,
           currentScore: this.state.players[playerA].data.Score
         });
         playerAlreadyRanked.push(playerA);
       });
-
+      
       this.setState({ matchs: [match].concat(this.state.matchs) });
     })
   }
@@ -90,8 +121,8 @@ class App extends Component {
     /* Send the player to Firebase */
     fire.database().ref('players').push( {
       "Name": this.inputName.value,
-      "Main": this.inputMain.value,
-      "Score": 1000
+      "Score": 1000,
+      "Color": '#ffffff'
     } );
     this.inputName.value = ''; // <- clear the input
   }
@@ -111,27 +142,41 @@ class App extends Component {
     this.setState({ [field]: e.target.value });
   };
 
+  handleChangePlayer = (field, e, key) => {
+    let players = Object.assign({}, this.state.players);
+
+    players[key].data.Color = e.hex;
+
+    console.log(players[key]);
+
+    this.setState({ players: players });
+
+      var updates = {};
+
+      updates['/players/' + key] = players[key].data
+
+      fire.database().ref().update(updates)
+  };
+
   handleChangeSelect = (field, e) => {
     this.setState({ [field]: e });
   };
-  
+
   render() {
     return (
       <div className="App">
-        <section>
+        <section className="Section">
         <h2>Joueurs</h2>
         <form onSubmit={this.addplayer.bind(this)}>
           <label htmlFor="Name">Name</label><br />
           <input name="Name" id="Name" type="text" ref={ el => this.inputName = el }/><br />
-          <label htmlFor="Main">Main</label><br />
-          <input name="Main" id="Main" type="text" ref={ el => this.inputMain = el }/><br />
           <input type="submit"/>
           <hr />
           <table className="table">
             <thead>
               <tr>
                 <th>Nom</th>
-                <th>Main character</th>
+                <th>Color</th>
                 <th>Score</th>
               </tr>
             </thead>
@@ -140,7 +185,14 @@ class App extends Component {
               Object.keys(this.state.players).sort((a, b) => this.state.players[a].data.Score - this.state.players[b].data.Score).reverse().map(key => (
                   <tr key={key}>
                     <td>{this.state.players[key].data.Name}</td>
-                    <td>{this.state.players[key].data.Main}</td>
+                    <td>
+                      <div className="colorPlayer" style={{background: this.state.players[key].data.Color, width: '1em', height: '1em', border: '1px solid black'}}>
+                        <GithubPicker 
+                          className="colorPicker"
+                          color={ this.state.players[key].data.Color }
+                          onChange={(e) => this.handleChangePlayer('color', e, key)}/>
+                      </div>
+                    </td>
                     <td>{Math.floor(this.state.players[key].data.Score)}</td>
                   </tr>
                 )
@@ -150,7 +202,7 @@ class App extends Component {
           </table>
         </form>
         </section>
-        <section>
+        <section className="Section">
         <h2>Match</h2>
         <form onSubmit={this.addmatch.bind(this)}>
           <label htmlFor="Date">Date</label><br />
@@ -188,7 +240,7 @@ class App extends Component {
                     <td>
                       <ol>
                         { match.Results.map( result => (
-                          <li key={result.id}>{this.state.players[result.id].data.Name} ({result.currentScore})</li>
+                          <li key={result.id}>{this.state.players[result.id].data.Name}</li>
                         ) )
                         }
                       </ol>
@@ -199,6 +251,28 @@ class App extends Component {
             </tbody>
           </table>
         </form>
+      </section>
+      <section className="Schema">
+
+        {/* <table className="table">
+          <tbody>
+            {
+            Object.keys(this.state.teamRanked).sort((a, b) => this.state.players[a].data.Score - this.state.players[b].data.Score).reverse().map(keyPlayer => (
+                <tr key={keyPlayer}>
+                  <th>{this.state.players[keyPlayer].data.Name}</th>
+
+                  {this.state.teamRanked[keyPlayer].map(item => (                      
+                    <td>{item}</td>
+                  ))}
+
+                  
+                </tr>
+              )
+            )
+            }
+          </tbody>
+        </table> */}
+        <BarChart players={this.state.players} data={this.state.teamRanked} colors={this.state.colors} finalRank={Object.keys(this.state.teamRanked).sort((a, b) => this.state.players[a].data.Score - this.state.players[b].data.Score).reverse()} id="barCharts" />
       </section>
       </div>
     );
