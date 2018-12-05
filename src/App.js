@@ -4,6 +4,7 @@ import Select from 'react-select';
 import './App.scss';
 import BarChart from './components/BarChart';
 import { GithubPicker } from 'react-color';
+import axios from 'axios';
 
 class App extends Component {
   constructor(props) {
@@ -51,20 +52,20 @@ class App extends Component {
 
     let matchsRef = fire.database().ref('matchs').orderByChild("Date").limitToLast(100);
     matchsRef.on('child_added', snapshot => {
-      const results = snapshot.val().Results;
+      const matchResults = snapshot.val().matchResults;
       let match = { 
-        Date: snapshot.val().Date, 
+        matchDate: snapshot.val().matchDate, 
         id: snapshot.key,
-        Results: []
+        matchResults: []
       };
       let ratio = 0.1;
       let rankPlayerA = 0;
       let playerAlreadyRanked = [];
-      results.forEach(playerA => {
+      matchResults.forEach(playerA => {
         rankPlayerA = rankPlayerA+1;
         let rankPlayerB = 0;
 
-        results.forEach(playerB => {
+        matchResults.forEach(playerB => {
           rankPlayerB = rankPlayerB+1;
           if (playerA !== playerB && playerAlreadyRanked.includes(playerB)) {
             let players = Object.assign({}, this.state.players); 
@@ -106,7 +107,7 @@ class App extends Component {
 
         this.setState({ teamRanked: teamRanked });
 
-        match.Results.push({
+        match.matchResults.push({
           id: playerA,
           currentScore: this.state.players[playerA].data.Score
         });
@@ -128,14 +129,27 @@ class App extends Component {
   }
   addmatch(e){
     e.preventDefault(); // <- prevent form submit from reloading the page
-    const results = this.state.selectedOption.map(item => {
+    const matchResults = this.state.selectedOption.map(item => {
       return item.value;
     });
-    fire.database().ref('matchs').push( {
-      "Date": this.inputDate.value,
-      "Results": results
-    } );
-    this.inputDate.value = ''; // <- clear the input
+
+
+    axios({
+      method: 'post',
+      url: 'http://localhost:5001/ultimate-ranking/us-central1/addMatch',
+      data: {
+        matchDate: this.inputDate.value,
+        matchResults: matchResults,
+      },
+      headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+      },
+    }).then(function (response) {
+        console.log(response);
+    }).catch(function (error) {
+        console.log(error);
+    });
+
   }
 
   handleChange = (field, e) => {
@@ -146,8 +160,6 @@ class App extends Component {
     let players = Object.assign({}, this.state.players);
 
     players[key].data.Color = e.hex;
-
-    console.log(players[key]);
 
     this.setState({ players: players });
 
@@ -236,10 +248,10 @@ class App extends Component {
               { /* Render the list of matchs */
                 this.state.matchs.map( match => (
                   <tr key={match.id}>
-                    <td>{match.Date}</td>
+                    <td>{match.matchDate}</td>
                     <td>
                       <ol>
-                        { match.Results.map( result => (
+                        { match.matchResults.map( result => (
                           <li key={result.id}>{this.state.players[result.id].data.Name}</li>
                         ) )
                         }
