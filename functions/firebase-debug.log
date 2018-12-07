@@ -1,0 +1,25 @@
+[debug] [2018-12-07T12:25:23.151Z] ----------------------------------------------------------------------
+[debug] [2018-12-07T12:25:23.154Z] Command:       /Users/mingus/.nvm/versions/node/v8.12.0/bin/node /Users/mingus/.nvm/versions/node/v8.12.0/bin/firebase functions:shell
+[debug] [2018-12-07T12:25:23.154Z] CLI Version:   6.1.1
+[debug] [2018-12-07T12:25:23.154Z] Platform:      darwin
+[debug] [2018-12-07T12:25:23.154Z] Node Version:  v8.12.0
+[debug] [2018-12-07T12:25:23.155Z] Time:          Fri Dec 07 2018 13:25:23 GMT+0100 (CET)
+[debug] [2018-12-07T12:25:23.155Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-12-07T12:25:23.168Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-12-07T12:25:23.169Z] > authorizing via signed-in user
+[debug] [2018-12-07T12:25:23.169Z] [iam] checking project ultimate-ranking for permissions ["firebase.projects.get"]
+[debug] [2018-12-07T12:25:23.172Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/ultimate-ranking:testIamPermissions  
+
+[debug] [2018-12-07T12:25:24.189Z] <<< HTTP RESPONSE 200
+[info] i  functions: Preparing to emulate functions.
+[debug] [2018-12-07T12:25:24.891Z] Fetching environment
+[debug] [2018-12-07T12:25:24.893Z] >>> HTTP REQUEST GET https://cloudresourcemanager.googleapis.com/v1/projects/ultimate-ranking  
+ 
+[debug] [2018-12-07T12:25:25.808Z] <<< HTTP RESPONSE 200
+[debug] [2018-12-07T12:25:25.809Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/556537029932:getServerAppConfig  
+ 
+[debug] [2018-12-07T12:25:26.050Z] <<< HTTP RESPONSE 200
+[debug] [2018-12-07T12:25:26.050Z] Starting @google-cloud/functions-emulator
+[debug] [2018-12-07T12:25:27.602Z] Parsing function triggers
+[info] ✔  functions: addMatch

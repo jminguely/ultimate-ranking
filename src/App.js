@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import fire from './fire';
-import Select from 'react-select';
 import './App.scss';
 import BarChart from './components/BarChart';
 import { GithubPicker } from 'react-color';
 import axios from 'axios';
+import icons from './data/icons.json';
 
 class App extends Component {
   constructor(props) {
@@ -13,9 +13,8 @@ class App extends Component {
       colors: {},
       players: {}, 
       matchs: [], 
-      playersSelect: [],
-      teamRanked: {},
-      selectedOption: null,
+      newMatch: [{}],
+      leaderBoard: [],
       datetime: `${new Date().getFullYear()}-${`${new Date().getMonth() +
         1}`.padStart(2, 0)}-${`${new Date().getDay() + 1}`.padStart(
         2,
@@ -32,88 +31,34 @@ class App extends Component {
     playersRef.on('child_added', snapshot => {
       /* Update React state when player is added at Firebase Database */
       let players = Object.assign({}, this.state.players); 
-      let teamRanked = Object.assign({}, this.state.teamRanked); 
       let colors = Object.assign({}, this.state.colors); 
-      const playerSelect = { value: snapshot.key, label: snapshot.val().Name };
       
-      colors[snapshot.key] = snapshot.val().Color;
+      colors[snapshot.key] = snapshot.val().playerColor;
 
-      players[snapshot.key] = { data: snapshot.val(), id: snapshot.key, ranking: [] };
+      players[snapshot.key] = snapshot.val();
       
-      teamRanked[snapshot.key] = [];
 
       this.setState({ 
         colors: colors,
-        teamRanked: teamRanked,
         players: players,
-        playersSelect: [playerSelect].concat(this.state.playersSelect),
       });
     })
 
+    playersRef.on('child_changed', snapshot => {
+      let players = Object.assign({}, this.state.players); 
+      // console.log(players, snapshot.key, snapshot.val());
+      players[snapshot.key] = snapshot.val();
+      this.setState({ players: players,});
+    })
+    
+
     let matchsRef = fire.database().ref('matchs').orderByChild("Date").limitToLast(100);
     matchsRef.on('child_added', snapshot => {
-      const matchResults = snapshot.val().matchResults;
       let match = { 
         matchDate: snapshot.val().matchDate, 
         id: snapshot.key,
-        matchResults: []
+        matchResults: snapshot.val().matchResults
       };
-      let ratio = 0.1;
-      let rankPlayerA = 0;
-      let playerAlreadyRanked = [];
-      matchResults.forEach(playerA => {
-        rankPlayerA = rankPlayerA+1;
-        let rankPlayerB = 0;
-
-        matchResults.forEach(playerB => {
-          rankPlayerB = rankPlayerB+1;
-          if (playerA !== playerB && playerAlreadyRanked.includes(playerB)) {
-            let players = Object.assign({}, this.state.players); 
-
-            const misePlayerA = ratio * this.state.players[playerA].data.Score;
-            const misePlayerB = ratio * this.state.players[playerB].data.Score;
-
-            if (rankPlayerA < rankPlayerB) {
-              players[playerA].data.Score = players[playerA].data.Score + misePlayerB;
-              players[playerB].data.Score = players[playerB].data.Score - misePlayerB;
-            } else {
-              players[playerA].data.Score = players[playerA].data.Score - misePlayerA;
-              players[playerB].data.Score = players[playerB].data.Score + misePlayerA;
-            }
-
-            this.setState({
-              players: players
-            });
-
-          }
-        });
-
-        let tempRank = [];
-
-        Object.keys(this.state.players).forEach(key => {
-          tempRank.push({
-            id: key,
-            score: this.state.players[key].data.Score
-          });
-        });
-
-        let i = 0;
-        let teamRanked = Object.assign({}, this.state.teamRanked); 
-
-        tempRank.sort((a, b) => a.score - b.score).reverse().forEach(item => {
-          i++;
-          teamRanked[item.id].push(i);
-        });
-
-        this.setState({ teamRanked: teamRanked });
-
-        match.matchResults.push({
-          id: playerA,
-          currentScore: this.state.players[playerA].data.Score
-        });
-        playerAlreadyRanked.push(playerA);
-      });
-      
       this.setState({ matchs: [match].concat(this.state.matchs) });
     })
   }
@@ -121,35 +66,31 @@ class App extends Component {
     e.preventDefault(); // <- prevent form submit from reloading the page
     /* Send the player to Firebase */
     fire.database().ref('players').push( {
-      "Name": this.inputName.value,
-      "Score": 1000,
-      "Color": '#ffffff'
+      "playerName": this.inputPlayerName.value,
+      "playerScore": 1000,
+      "playerColor": '#ffffff'
     } );
-    this.inputName.value = ''; // <- clear the input
+    this.inputPlayerName.value = ''; // <- clear the input
   }
   addmatch(e){
     e.preventDefault(); // <- prevent form submit from reloading the page
-    const matchResults = this.state.selectedOption.map(item => {
-      return item.value;
-    });
-
 
     axios({
       method: 'post',
-      url: 'http://localhost:5001/ultimate-ranking/us-central1/addMatch',
+      url: 'http://localhost:5000/ultimate-ranking/us-central1/addMatch',
       data: {
         matchDate: this.inputDate.value,
-        matchResults: matchResults,
+        matchResults: this.state.newMatch,
       },
       headers: {
           'Content-Type': 'text/plain;charset=utf-8',
       },
     }).then(function (response) {
         console.log(response);
+        this.setState({ newMatch: [{}] });
     }).catch(function (error) {
         console.log(error);
     });
-
   }
 
   handleChange = (field, e) => {
@@ -159,19 +100,34 @@ class App extends Component {
   handleChangePlayer = (field, e, key) => {
     let players = Object.assign({}, this.state.players);
 
-    players[key].data.Color = e.hex;
+    if(field === 'playerColor') {
+      players[key].playerColor = e.hex;
+    }else {
+      players[key][field] = e.target.value;
+    }
 
     this.setState({ players: players });
 
-      var updates = {};
+    var updates = {};
 
-      updates['/players/' + key] = players[key].data
+    updates['/players/' + key] = players[key]
 
-      fire.database().ref().update(updates)
+    fire.database().ref().update(updates)
   };
 
-  handleChangeSelect = (field, e) => {
-    this.setState({ [field]: e });
+  handleChangeNewMatch = (field, e, i) => {
+    let newMatch = Object.assign([], this.state.newMatch); 
+    newMatch[i][field] = e.target.value;
+
+    if(!newMatch[i]['playerCharacter'] && newMatch[i]['playerKey'] ) {
+      newMatch[i]['playerCharacter'] = this.state.players[newMatch[i]['playerKey']].playerMainCharacter
+    }
+
+    if (newMatch.length < 8 && newMatch[newMatch.length-1].playerKey){
+      newMatch.push({});
+    }
+
+    this.setState({ newMatch: newMatch });
   };
 
   render() {
@@ -180,8 +136,8 @@ class App extends Component {
         <section className="Section">
         <h2>Joueurs</h2>
         <form onSubmit={this.addplayer.bind(this)}>
-          <label htmlFor="Name">Name</label><br />
-          <input name="Name" id="Name" type="text" ref={ el => this.inputName = el }/><br />
+          <label htmlFor="playerName">Name</label><br />
+          <input name="playerName" id="playerName" type="text" ref={ el => this.inputPlayerName = el }/><br />
           <input type="submit"/>
           <hr />
           <table className="table">
@@ -189,23 +145,44 @@ class App extends Component {
               <tr>
                 <th>Nom</th>
                 <th>Color</th>
+                <th></th>
+                <th>Main Character</th>
                 <th>Score</th>
               </tr>
             </thead>
             <tbody>
               { /* Render the list of players */
-              Object.keys(this.state.players).sort((a, b) => this.state.players[a].data.Score - this.state.players[b].data.Score).reverse().map(key => (
+              Object.keys(this.state.players).sort((a, b) => this.state.players[a].playerScore - this.state.players[b].playerScore).reverse().map(key => (
                   <tr key={key}>
-                    <td>{this.state.players[key].data.Name}</td>
+                    <td>{this.state.players[key].playerName}</td>
                     <td>
-                      <div className="colorPlayer" style={{background: this.state.players[key].data.Color, width: '1em', height: '1em', border: '1px solid black'}}>
+                      <div className="colorPlayer" style={{background: this.state.players[key].playerColor, width: '1em', height: '1em', border: '1px solid black'}}>
                         <GithubPicker 
                           className="colorPicker"
-                          color={ this.state.players[key].data.Color }
-                          onChange={(e) => this.handleChangePlayer('color', e, key)}/>
+                          color={ this.state.players[key].playerColor }
+                          onChange={(e) => this.handleChangePlayer('playerColor', e, key)}/>
                       </div>
                     </td>
-                    <td>{Math.floor(this.state.players[key].data.Score)}</td>
+                    <td>
+                      {
+                        this.state.players[key].playerMainCharacter && (
+                          <img alt="" className="characterIcon" src={`${process.env.PUBLIC_URL}/assets/svg/${this.state.players[key].playerMainCharacter}.svg`} />
+                        )
+                      }
+                    </td>
+                    <td>
+                    <select 
+                      value={this.state.players[key].playerMainCharacter}
+                      onChange={(e) => this.handleChangePlayer('playerMainCharacter', e, key)}
+                      >
+                        <option value=""></option>
+                        {icons.map(icon =>
+                          <option key={icon.value} value={icon.value}>{icon.label}</option>
+                        )};
+                    </select>
+
+                    </td>
+                    <td>{Math.floor(this.state.players[key].playerScore)}</td>
                   </tr>
                 )
               )
@@ -227,14 +204,38 @@ class App extends Component {
             ref={ el => this.inputDate = el }
           /><br />
           <label htmlFor="Players">Players</label><br />
-          <Select
-            name="Players"
-            id="Players"
-            value={ this.state.selectedOption }
-            options={this.state.playersSelect}
-            onChange={e => this.handleChangeSelect('selectedOption', e)}
-            isMulti={true}
-          />
+          <table className="table">
+            <tbody>
+              {this.state.newMatch.map((rank, index) =>
+                <tr key={index}>
+                  <td>{index}</td>
+                  <td>
+                    <select 
+                      value={rank.playerKey}
+                      onChange={(e) => this.handleChangeNewMatch('playerKey', e, index)}
+                      >
+                        <option value=""></option>
+                        {Object.keys(this.state.players).map(key => (
+                          <option key={key} value={key}>{this.state.players[key].playerName}</option>
+                        ))};
+                    </select>
+                  </td>
+                  <td>
+                    <select 
+                      value={rank.playerCharacter}
+                      onChange={(e) => this.handleChangeNewMatch('playerCharacter', e, index)}
+                      >
+                        <option value=""></option>
+                        {icons.map(icon =>
+                          <option key={icon.value} value={icon.value}>{icon.label}</option>
+                        )};
+                    </select>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          
           <input type="submit"/>
           <hr />
           <table className="table">
@@ -248,11 +249,13 @@ class App extends Component {
               { /* Render the list of matchs */
                 this.state.matchs.map( match => (
                   <tr key={match.id}>
+                  
                     <td>{match.matchDate}</td>
                     <td>
                       <ol>
-                        { match.matchResults.map( result => (
-                          <li key={result.id}>{this.state.players[result.id].data.Name}</li>
+                        { match.matchResults.map( rank => (
+                          
+                          <li key={rank.playerKey}>{this.state.players[rank.playerKey].playerName} ({Math.floor(rank.prevScore)} -> {Math.floor(rank.newScore)})</li>
                         ) )
                         }
                       </ol>
@@ -266,25 +269,11 @@ class App extends Component {
       </section>
       <section className="Schema">
 
-        {/* <table className="table">
-          <tbody>
-            {
-            Object.keys(this.state.teamRanked).sort((a, b) => this.state.players[a].data.Score - this.state.players[b].data.Score).reverse().map(keyPlayer => (
-                <tr key={keyPlayer}>
-                  <th>{this.state.players[keyPlayer].data.Name}</th>
-
-                  {this.state.teamRanked[keyPlayer].map(item => (                      
-                    <td>{item}</td>
-                  ))}
-
-                  
-                </tr>
-              )
-            )
-            }
-          </tbody>
-        </table> */}
-        <BarChart players={this.state.players} data={this.state.teamRanked} colors={this.state.colors} finalRank={Object.keys(this.state.teamRanked).sort((a, b) => this.state.players[a].data.Score - this.state.players[b].data.Score).reverse()} id="barCharts" />
+        <BarChart 
+          players={this.state.players}
+          matchs={this.state.matchs}
+          id="barCharts" 
+        />
       </section>
       </div>
     );

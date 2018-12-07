@@ -1,0 +1,294 @@
+[
+  {
+    "value": "bayonetta",
+    "label": "bayonetta"
+  },
+  {
+    "value": "bowser",
+    "label": "bowser"
+  },
+  {
+    "value": "bowser_jr",
+    "label": "bowser_jr"
+  },
+  {
+    "value": "captain_falcon",
+    "label": "captain_falcon"
+  },
+  {
+    "value": "chrom",
+    "label": "chrom"
+  },
+  {
+    "value": "cloud",
+    "label": "cloud"
+  },
+  {
+    "value": "corrin",
+    "label": "corrin"
+  },
+  {
+    "value": "daisy",
+    "label": "daisy"
+  },
+  {
+    "value": "dark_pit",
+    "label": "dark_pit"
+  },
+  {
+    "value": "dark_samus",
+    "label": "dark_samus"
+  },
+  {
+    "value": "diddy_kong",
+    "label": "diddy_kong"
+  },
+  {
+    "value": "donkey_kong",
+    "label": "donkey_kong"
+  },
+  {
+    "value": "dr_mario",
+    "label": "dr_mario"
+  },
+  {
+    "value": "duck_hunt",
+    "label": "duck_hunt"
+  },
+  {
+    "value": "falco",
+    "label": "falco"
+  },
+  {
+    "value": "fox",
+    "label": "fox"
+  },
+  {
+    "value": "ganondorf",
+    "label": "ganondorf"
+  },
+  {
+    "value": "gaogaen",
+    "label": "gaogaen"
+  },
+  {
+    "value": "greninja",
+    "label": "greninja"
+  },
+  {
+    "value": "ice_climbers",
+    "label": "ice_climbers"
+  },
+  {
+    "value": "ike",
+    "label": "ike"
+  },
+  {
+    "value": "inkling",
+    "label": "inkling"
+  },
+  {
+    "value": "isabelle",
+    "label": "isabelle"
+  },
+  {
+    "value": "jigglypuff",
+    "label": "jigglypuff"
+  },
+  {
+    "value": "ken",
+    "label": "ken"
+  },
+  {
+    "value": "king_dedede",
+    "label": "king_dedede"
+  },
+  {
+    "value": "king_k_rool",
+    "label": "king_k_rool"
+  },
+  {
+    "value": "kirby",
+    "label": "kirby"
+  },
+  {
+    "value": "link",
+    "label": "link"
+  },
+  {
+    "value": "little_mac",
+    "label": "little_mac"
+  },
+  {
+    "value": "lucario",
+    "label": "lucario"
+  },
+  {
+    "value": "lucas",
+    "label": "lucas"
+  },
+  {
+    "value": "lucina",
+    "label": "lucina"
+  },
+  {
+    "value": "luigi",
+    "label": "luigi"
+  },
+  {
+    "value": "mario",
+    "label": "mario"
+  },
+  {
+    "value": "marth",
+    "label": "marth"
+  },
+  {
+    "value": "mega_man",
+    "label": "mega_man"
+  },
+  {
+    "value": "meta_knight",
+    "label": "meta_knight"
+  },
+  {
+    "value": "mewtwo",
+    "label": "mewtwo"
+  },
+  {
+    "value": "mii_fighter",
+    "label": "mii_fighter"
+  },
+  {
+    "value": "mr_game_and_watch",
+    "label": "mr_game_and_watch"
+  },
+  {
+    "value": "ness",
+    "label": "ness"
+  },
+  {
+    "value": "olimar",
+    "label": "olimar"
+  },
+  {
+    "value": "pac_man",
+    "label": "pac_man"
+  },
+  {
+    "value": "packun_flower",
+    "label": "packun_flower"
+  },
+  {
+    "value": "palutena",
+    "label": "palutena"
+  },
+  {
+    "value": "peach",
+    "label": "peach"
+  },
+  {
+    "value": "pichu",
+    "label": "pichu"
+  },
+  {
+    "value": "pikachu",
+    "label": "pikachu"
+  },
+  {
+    "value": "pit",
+    "label": "pit"
+  },
+  {
+    "value": "pokemon_trainer",
+    "label": "pokemon_trainer"
+  },
+  {
+    "value": "richter",
+    "label": "richter"
+  },
+  {
+    "value": "ridley",
+    "label": "ridley"
+  },
+  {
+    "value": "rob",
+    "label": "rob"
+  },
+  {
+    "value": "robin",
+    "label": "robin"
+  },
+  {
+    "value": "rosalina_and_luma",
+    "label": "rosalina_and_luma"
+  },
+  {
+    "value": "roy",
+    "label": "roy"
+  },
+  {
+    "value": "ryu",
+    "label": "ryu"
+  },
+  {
+    "value": "samus",
+    "label": "samus"
+  },
+  {
+    "value": "sheik",
+    "label": "sheik"
+  },
+  {
+    "value": "shulk",
+    "label": "shulk"
+  },
+  {
+    "value": "simon",
+    "label": "simon"
+  },
+  {
+    "value": "snake",
+    "label": "snake"
+  },
+  {
+    "value": "sonic",
+    "label": "sonic"
+  },
+  {
+    "value": "toon_link",
+    "label": "toon_link"
+  },
+  {
+    "value": "villager",
+    "label": "villager"
+  },
+  {
+    "value": "wario",
+    "label": "wario"
+  },
+  {
+    "value": "wii_fit_trainer",
+    "label": "wii_fit_trainer"
+  },
+  {
+    "value": "wolf",
+    "label": "wolf"
+  },
+  {
+    "value": "yoshi",
+    "label": "yoshi"
+  },
+  {
+    "value": "young_link",
+    "label": "young_link"
+  },
+  {
+    "value": "zelda",
+    "label": "zelda"
+  },
+  {
+    "value": "zero_suit_samus",
+    "label": "zero_suit_samus"
+  }
+]
