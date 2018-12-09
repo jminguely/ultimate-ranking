@@ -1,19 +1,15 @@
 import React, {Component} from 'react';
-import * as d3 from "d3";
 
 class BarChart extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      width: 900,
-      height: 300,
-      matchs: props.matchs,
+    this.state = {
+      leaderBoard: props.leaderBoard,
       players: props.players,
+      matchs: props.matchs,
+      widthCharts: 1000,
+      heightCharts: 500,
     };
-
-    console.log(props.players, props.matchs);
-
-    this.drawChart();
 
   }
 
@@ -21,104 +17,56 @@ class BarChart extends Component {
     if (prevProps !== this.props) {
       this.setState({ 
         players: prevProps.players, 
-        matchs: prevProps.matchs
+        matchs: prevProps.matchs,
+        leaderBoard: prevProps.leaderBoard
       });
-      this.drawChart();
     }
   }
-
-  drawChart() {
-
-    if(Object.keys(this.state.players).length > 0) {
-      var margin = {top: 20, right: 100, bottom: 30, left: 10},
-      width = 960 - margin.left - margin.right,
-      height = 300 - margin.top - margin.bottom;
-
-      var x = d3.scale.linear()
-      .range([0, width]);
-
-      var y = d3.scale.linear()
-          .range([height, 0]);
-
-      var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient('bottom')
-        .tickFormat(function(d) {
-          if (d % 1 === 0) {
-            return d3.format('.f')(d)
-          } else {
-            return ""
-          }
-        });
-
-
-      var yAxis = d3.svg.axis()
-          .scale(y)
-          .orient('right').tickFormat(d => {
-            if (d % 1 === 0) {
-              // return this.state.players[this.state.finalRank[d-1]].data.playerName;
-            } else {
-              return ""
-            }
-          });
-
-
-      var line = d3.svg.line()
-          .interpolate('monotone')
-          .x(function(d, i) { return x(i+1); })
-          .y(function(d) { return y(d); });
-
-
-      d3.select(`#${this.props.id}`).selectAll("svg").remove();
-
-      var svg = d3.select(`#${this.props.id}`).append('svg')
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
-      .attr("preserveAspectRatio", "xMinYMin meet")
-      .attr("viewBox", "0 0 960 300")
-      .append('g')
-      .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-      
-      var teamNames = Object.keys(this.state.players);
-
-      // Lets do some magic
-      
-      // var teamData = teamNames.map((t, i) => { 
-      //   return { name: t, values: this.state.data[t], index: i };
-      // });
-      // x.domain(d3.extent(d3.range(1, teamData[0].values.length + 1)));
-      // y.domain([teamNames.length + 0.5, 1]);
-
-      svg.append('g')
-          .attr('class', 'x axis')
-          .attr('transform', 'translate(0,' + height + ')')
-          .call(xAxis);
-
-      svg.append('g')
-          .attr('class', 'y axis')
-          .attr('transform', 'translate(' + width + ', 0)')
-          .call(yAxis.outerTickSize(0)
-            .innerTickSize(0))
-
-      // svg.append('g').selectAll('.line')
-      //     .data(teamData)
-      //     .enter()
-      //     .append('path')
-      //     .attr('class', 'line')
-      //     .attr('d', function(d) { return line(d.values); })
-      //     .style({
-      //       stroke: (d, i) => { 
-      //         return this.state.colors[d.name];
-      //       },
-      //       fill: 'transparent',
-      //       'stroke-width': 2
-      //     })
-         
-    }
-  }
-        
+  
   render(){
-    return <div id={this.props.id}></div>
+    return (
+      <svg preserveAspectRatio="xMaxYMax meet" width={this.state.widthCharts} height={this.state.heightCharts} viewBox={`0 0 ${this.state.widthCharts} ${this.state.heightCharts}`}>
+        <g>
+          {this.state.matchs.map((icon, index) => (
+            <line x1={(this.state.widthCharts-150) / this.state.matchs.length * (index + 1)} y1={0} x2={(this.state.widthCharts-150) / this.state.matchs.length * (index + 1)} y2={this.state.heightCharts} strokeWidth={1} stroke="#ddd"/>
+          )
+          )};
+        </g>
+        <g>
+          {[...Array(9).keys()].map((icon, index) => (
+            <line y1={(this.state.heightCharts) / 10 * (index + 1)} x1={0} y2={(this.state.heightCharts) / 10 * (index + 1)} x2={this.state.widthCharts} strokeWidth={1} stroke={index == 4 ? "#333" : "#ddd"}/>
+          )
+          )};
+        </g>
+        {Object.keys(this.state.leaderBoard).map((playerKey, playerIndex) => (
+          <g>
+          <text 
+            x={this.state.widthCharts-100} 
+            y={
+              this.state.heightCharts - this.state.leaderBoard[playerKey][this.state.leaderBoard[playerKey].length-1] / 4} 
+            fill={this.state.players[playerKey].playerColor} >
+              {this.state.players[playerKey].playerName} ({Math.round(this.state.players[playerKey].playerScore)})
+          </text>
+          <path 
+            d={`M 5 250 
+              ${
+                this.state.leaderBoard[playerKey].map((score, matchIndex) => (
+                  `L ${(this.state.widthCharts-150) / this.state.matchs.length * (matchIndex + 1 )} ${this.state.heightCharts - score / 4}`
+                ))
+                }
+                
+              `} 
+            stroke={this.state.players[playerKey].playerColor} 
+            strokeWidth="5" 
+            fill="none" 
+            strokeLinecap="round"
+          />
+          </g>
+
+        ))}
+
+      </svg>
+    )
   }
 }
     

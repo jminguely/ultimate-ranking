@@ -14,17 +14,29 @@ class App extends Component {
       players: {}, 
       matchs: [], 
       newMatch: [{}],
-      leaderBoard: [],
-      datetime: `${new Date().getFullYear()}-${`${new Date().getMonth() +
+      leaderBoard: {},
+      datetime: this.getDate() 
+    }; // <- set up react state
+
+    setInterval(() => {
+      this.setState({
+        datetime: this.getDate() 
+      });
+    }, 60000);
+  }
+
+  getDate() {
+    return `${new Date().getFullYear()}-${`${new Date().getMonth() +
         1}`.padStart(2, 0)}-${`${new Date().getDay() + 1}`.padStart(
         2,
         0
       )}T${`${new Date().getHours()}`.padStart(
         2,
         0
-      )}:${`${new Date().getMinutes()}`.padStart(2, 0)}`
-    }; // <- set up react state¨
+      )}:${`${new Date().getMinutes()}`.padStart(2, 0)}`;
   }
+
+
   componentWillMount(){
     /* Create reference to players in Firebase Database */
     let playersRef = fire.database().ref('players').orderByKey().limitToLast(100);
@@ -32,13 +44,17 @@ class App extends Component {
       /* Update React state when player is added at Firebase Database */
       let players = Object.assign({}, this.state.players); 
       let colors = Object.assign({}, this.state.colors); 
-      
+      let leaderBoard = Object.assign({}, this.state.leaderBoard); 
+
       colors[snapshot.key] = snapshot.val().playerColor;
 
       players[snapshot.key] = snapshot.val();
+
+      leaderBoard[snapshot.key] = [];
       
 
       this.setState({ 
+        leaderBoard: leaderBoard,
         colors: colors,
         players: players,
       });
@@ -54,14 +70,41 @@ class App extends Component {
 
     let matchsRef = fire.database().ref('matchs').orderByChild("Date").limitToLast(100);
     matchsRef.on('child_added', snapshot => {
+      let leaderBoard = Object.assign({}, this.state.leaderBoard); 
+
+      leaderBoard[snapshot.key] = snapshot.val().playerColor;
+
       let match = { 
         matchDate: snapshot.val().matchDate, 
         id: snapshot.key,
         matchResults: snapshot.val().matchResults
       };
-      this.setState({ matchs: [match].concat(this.state.matchs) });
+
+      Object.keys(this.state.leaderBoard).map((playerKey) =>{
+        let result = null;
+        for (let rank of match.matchResults){
+          if (rank.playerKey === playerKey) {
+            result = rank.newScore;
+          }
+        }
+        if(result !== null) {
+          this.state.leaderBoard[playerKey].push(result);
+        }else {
+          const lastIndex = this.state.leaderBoard[playerKey].length;
+          const lastScore = this.state.leaderBoard[playerKey][lastIndex-1] || 1000;
+          this.state.leaderBoard[playerKey].push(lastScore);
+        }
+      });
+
+
+      this.setState({ 
+        matchs: [match].concat(this.state.matchs),
+        // leaderBoard: leaderBoard,
+        });
     })
+
   }
+  
   addplayer(e){
     e.preventDefault(); // <- prevent form submit from reloading the page
     /* Send the player to Firebase */
@@ -268,12 +311,7 @@ class App extends Component {
         </form>
       </section>
       <section className="Schema">
-
-        <BarChart 
-          players={this.state.players}
-          matchs={this.state.matchs}
-          id="barCharts" 
-        />
+        <BarChart leaderBoard={this.state.leaderBoard} players={this.state.players} matchs={this.state.matchs}/>
       </section>
       </div>
     );
