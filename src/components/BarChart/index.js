@@ -41,7 +41,7 @@ class BarChart extends Component {
         {Object.keys(this.state.leaderBoard).map((playerKey, playerIndex) => (
           <g>
           <text 
-            x={this.state.widthCharts-100} 
+            x={this.state.widthCharts-140} 
             y={
               this.state.heightCharts - this.state.leaderBoard[playerKey][this.state.leaderBoard[playerKey].length-1] / 4} 
             fill={this.state.players[playerKey].playerColor} >
