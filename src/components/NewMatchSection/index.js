@@ -61,7 +61,7 @@ class NewMatchSection extends Component {
 
     axios({
       method: 'post',
-      url: 'http://localhost:5000/ultimate-ranking/us-central1/addMatch',
+      url: 'https://us-central1-ultimate-ranking.cloudfunctions.net/addMatch',
       data: {
         matchDate: this.inputDate.value,
         matchResults: this.state.newMatch,
