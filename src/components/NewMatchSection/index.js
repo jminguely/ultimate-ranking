@@ -75,7 +75,12 @@ class NewMatchSection extends Component {
     }).catch(function (error) {
         console.log(error);
     });
+
+    this.setState({ newMatch: [{}] });
+
   }
+
+  
 
   
   render(){

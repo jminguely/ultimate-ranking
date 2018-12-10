@@ -65,7 +65,7 @@ exports.addMatch = functions.https.onRequest((req, res) => {
       admin.database().ref().update(updates)
     });
 
-    return admin.database().ref('/matchs').push(match).then((snapshot) => {});
+    return admin.database().ref('/matchs').push(match).then((snapshot) => {'success'});
   });
 
   }, (error) => {
