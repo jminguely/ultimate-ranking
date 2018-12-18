@@ -1,0 +1,20 @@
+.navigation {
+  max-width: 800px;
+  margin: auto;
+  padding: 0 1em;
+  
+  ul {
+    display: flex;
+    list-style: none;
+  }
+
+  a {
+    display: inline-block;
+    padding: 1em;
+  }
+
+  button, select {
+    display: inline-block;
+    margin: 1.4em;
+  }
+}
