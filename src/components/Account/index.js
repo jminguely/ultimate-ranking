@@ -36,11 +36,11 @@ const AccountPage = () => (
         <h1>Account: {authUser.email}</h1>
         <h2>Leagues</h2>
         <h2>Player info</h2>
-        <label for="">default main character</label>
+        <label htmlFor="">default main character</label>
         <h2>Password manager</h2>
-        <label for="">Password reset</label>
+        <label htmlFor="">Password reset</label>
         <PasswordForgetForm />
-        <label for="">Password change</label>
+        <label htmlFor="">Password change</label>
         <PasswordChangeForm />
         <h2>Sign in Methods</h2>
         <LoginManagement authUser={authUser} />

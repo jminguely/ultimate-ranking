@@ -62,50 +62,55 @@ class Season extends Component {
             {
               this.state.currentLeague &&
               <>
-                <h2>League: {this.state.currentLeague.leagueName}</h2>
+                <h2>League: <strong>{this.state.currentLeague.leagueName}</strong></h2>
                 {this.state.currentSeasonId && this.state.currentSeason &&
                   <div>
-                    <h2>Season: {this.state.currentSeason.seasonName}</h2>
-
+                    <h2>Season: <strong>{this.state.currentSeason.seasonName}</strong></h2>
+                    <hr /> 
+                    <h3>Ajouter un match</h3>
                     <NewMatch 
                       leagueId={this.state.currentLeagueId}
                       league={this.state.currentLeague}
                     />
 
                     <hr />
-                    <h3>Matchs</h3>
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th>Datetime</th>
-                          <th>Classement</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        { /* Render the list of matchs */
-                          Object.keys(this.state.currentLeague.leagueMatchs).map( match => (
-                            <tr key={match}>
-                            
-                              <td>{this.state.currentLeague.leagueMatchs[match].matchDate}</td>
-                              <td>
-                                <ol>
-                                  { this.state.currentLeague.leagueMatchs[match].matchResults.map( rank => (
-                                    
-                                    <li key={rank.playerKey}>{this.state.currentLeague.leaguePlayers[rank.playerKey].playerName} ({Math.floor(rank.prevScore)} -> {Math.floor(rank.newScore)})</li>
-                                  ) )
-                                  }
-                                </ol>
-                              </td>
+                    { this.state.currentLeague.leagueMatchs &&
+                      <>
+                        <h3>Liste des matchs</h3>
+                        <table className="table">
+                          <thead>
+                            <tr>
+                              <th>Datetime</th>
+                              <th>Classement</th>
                             </tr>
-                          ) )
-                        }
-                      </tbody>
-                    </table>
-                    <br />
-                    <hr />
-                    <br />
-                    <h3>Barcharts</h3>
-                    <BarChart league={this.state.currentLeague}/>
+                          </thead>
+                          <tbody>
+                            { /* Render the list of matchs */
+                              Object.keys(this.state.currentLeague.leagueMatchs).map( match => (
+                                <tr key={match}>
+                                
+                                  <td>{this.state.currentLeague.leagueMatchs[match].matchDate}</td>
+                                  <td>
+                                    <ol>
+                                      { this.state.currentLeague.leagueMatchs[match].matchResults.map( rank => (
+                                        
+                                        <li key={rank.playerKey}>{this.state.currentLeague.leaguePlayers[rank.playerKey].playerName} ({Math.floor(rank.prevScore)} -> {Math.floor(rank.newScore)})</li>
+                                      ) )
+                                      }
+                                    </ol>
+                                  </td>
+                                </tr>
+                              ) )
+                            }
+                          </tbody>
+                        </table>
+                        <br />
+                        <hr />
+                        <br />
+                        <h3>Barchart</h3>
+                        <BarChart league={this.state.currentLeague}/>
+                      </>
+                    }
                   </div>
                 }
               </>

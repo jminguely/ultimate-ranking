@@ -87,7 +87,6 @@ class NewMatchSection extends Component {
   render(){
     return (
       <div>
-        <h2>Match</h2>
         <form onSubmit={this.addmatch.bind(this)}>
           <label htmlFor="Date">Date</label><br />
           <input 
@@ -98,6 +97,7 @@ class NewMatchSection extends Component {
             onChange={e => this.handleChange('datetime', e)}
             ref={ el => this.inputDate = el }
           /><br />
+          <br />
           <label htmlFor="Players">Players</label><br />
           <table className="table">
             <tbody>
