@@ -7,14 +7,16 @@ class ColorPicker extends Component {
     super(props);
     
     this.state = {
-      color: props.color
+      color: props.color,
+      disabled: props.disabled,
     };
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps !== this.props) {
       this.setState({ 
-        color: this.props.color
+        color: this.props.color,
+        disabled: this.props.disabled,
       });
     }
   }
@@ -23,11 +25,13 @@ class ColorPicker extends Component {
     return (
       <>
         <div className="colorPreview" style={{background: this.state.color, width: '1em', height: '1em', border: '1px solid black'}}>
-        <GithubPicker 
-          className="colorPicker"
-          color={ this.state.color }
-          onChange={(e) => this.props.handleChange(e.hex)}/>
-          </div>
+        {
+          !this.state.disabled && <GithubPicker 
+            className="colorPicker"
+            color={ this.state.color }
+            onChange={(e) => this.props.handleChange(e.hex)}/>
+        }
+        </div>
       </>
     )
   }

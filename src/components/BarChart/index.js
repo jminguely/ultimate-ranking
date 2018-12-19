@@ -36,20 +36,20 @@ class BarChart extends Component {
         </g>
         <g>
           {[...Array(9).keys()].map((icon, index) => (
-            <line key={index} y1={(this.state.heightCharts) / 10 * (index + 1)} x1={0} y2={(this.state.heightCharts) / 10 * (index + 1)} x2={this.state.widthCharts} strokeWidth={1} stroke={index == 4 ? "#333" : "#ddd"}/>
+            <line key={index} y1={(this.state.heightCharts) / 10 * (index + 1)} x1={0} y2={(this.state.heightCharts) / 10 * (index + 1)} x2={this.state.widthCharts} strokeWidth={1} stroke={index === 4 ? "#333" : "#ddd"}/>
           )
           )};
         </g>
         {Object.keys(this.state.league.leaguePlayers).map((playerKey, playerIndex) => {
           const player = this.state.league.leaguePlayers[playerKey];
           let lastScore = 1000;
+            console.log(this.state.heightCharts, player.playerScore);
             return (
             <g key={playerIndex}>
             <text 
               x={this.state.widthCharts - rightMargin + 10} 
-              y={
-                this.state.heightCharts - player.playerScore / 4} 
-              fill={player.playerColor} >
+              y={this.state.heightCharts - player.playerScore / 4} 
+              fill={player.playerColor}>
                 {player.playerName} ({Math.round(player.playerScore)})
             </text>
             <path 
@@ -58,7 +58,7 @@ class BarChart extends Component {
                     Object.keys(this.state.league.leagueMatchs).map((matchKey, matchIndex) => {
                       const match = this.state.league.leagueMatchs[matchKey];
                       match.matchResults.forEach(rank => {
-                        if(rank.playerKey == playerKey) {
+                        if(rank.playerKey === playerKey) {
                           lastScore = rank.newScore;
                         }
                       });

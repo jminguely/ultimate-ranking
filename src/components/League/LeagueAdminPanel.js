@@ -13,6 +13,7 @@ class LeagueAdminPanel extends Component {
     };
 
     this.state = { 
+      authUser: props.authUser,
       currentLeagueId: props.currentLeagueId,
       currentLeague: props.currentLeague
     };
@@ -23,6 +24,7 @@ class LeagueAdminPanel extends Component {
   componentDidUpdate(prevProps) {
     if (prevProps !== this.props) {
       this.setState({
+        authUser: this.props.authUser,
         currentLeagueId: this.props.currentLeagueId,
         currentLeague: this.props.currentLeague,
       });
@@ -38,12 +40,15 @@ class LeagueAdminPanel extends Component {
   addPlayer(leagueId, e){
     e.preventDefault();
 
-    var updates = {};
 
     if(!this.isEmail(this.inputPlayerMail.value)) {
       alert('Adresse e-mail non valide');
       return;
     }
+
+    console.log(btoa(this.inputPlayerMail.value));
+
+    var updates = {};
 
     updates[`/leaguePlayers/${btoa(this.inputPlayerMail.value)}`] = {
       "playerName": this.inputPlayerMail.value,
@@ -101,6 +106,8 @@ class LeagueAdminPanel extends Component {
   unmakePlayerAdmin (event, playerId) {
     event.preventDefault();
 
+    console.log('ici', playerId);
+
     if (Object.keys(this.state.currentLeague.leagueAdmins).length <= 1) {
       alert("Can't revoke access of the last admin")
     }else {
@@ -120,10 +127,13 @@ class LeagueAdminPanel extends Component {
 
 
   render(){
+    const isAdmin = btoa(this.state.authUser.email) in this.state.currentLeague.leagueAdmins;
     return (
       <>
         <h3>Players</h3>
-            <form onSubmit={this.addPlayer.bind(this, this.state.currentLeagueId)}>
+        {isAdmin &&
+          <>
+           <form onSubmit={this.addPlayer.bind(this, this.state.currentLeagueId)}>
               <label htmlFor="playerMail">Add a new challenger</label><br />
               <input name="playerMail" placeholder="E-Mail address" id="playerMail" type="mail" ref={ el => this.inputPlayerMail = el }/>
               <input type="submit"/>
@@ -135,6 +145,9 @@ class LeagueAdminPanel extends Component {
               <input type="submit"/>
             </form>
             <hr />
+          </>
+        }
+           
         {
           this.state.currentLeague.leaguePlayers && (
           <>
@@ -146,39 +159,60 @@ class LeagueAdminPanel extends Component {
                   <th>Color</th>
                   <th>Main</th>
                   <th>Email</th>
-                  <th>Admin</th>
+                  {isAdmin && <th>Admin</th>}
                 </tr>
                 {Object.keys(this.state.currentLeague.leaguePlayers).map((playerId) => {
                   const player = this.state.currentLeague.leaguePlayers[playerId];
+                  let disabled = true;
+
+                  if (isAdmin 
+                    || btoa(this.state.authUser.email) === playerId){
+                      disabled = false;
+                  }
+
                   return (
                   <tr key={playerId}>
                     <td>
-                      <form onSubmit={this.editPlayer.bind(this, 'playerName', playerId)}>
-                        <input 
-                          name="playerName" 
-                          type="text" 
-                          defaultValue={player.playerName}
-                          ref={input => this.inputs['playerName'][playerId] = input} />
-                          <input type="submit"/>
-                      </form>
+                      { disabled ? (
+                        <span>{player.playerName}</span>
+                      ):(
+                        <>
+                          <form onSubmit={this.editPlayer.bind(this, 'playerName', playerId)}>
+                            <input 
+                              name="playerName" 
+                              type="text" 
+                              defaultValue={player.playerName}
+                              ref={input => this.inputs['playerName'][playerId] = input} />
+                              <input type="submit"/>
+                          </form>
+                        </>
+                      )}
                     </td>
                     <td>
-                      <ColorPicker handleChange={(value) => this.handleChangePlayer('playerColor', value, playerId)} color={player.playerColor}/>
+                      <ColorPicker handleChange={(value) => this.handleChangePlayer('playerColor', value, playerId)} color={player.playerColor} disabled={disabled}/>
                     </td>
                     <td>
-                      <CharacterPicker handleChange={(value) => this.handleChangePlayer('playerMainCharacter', value, playerId)} character={player.playerMainCharacter}/>
+                      { disabled ? (
+                        <span>{player.playerMainCharacter}</span>
+                      ):(
+                        <CharacterPicker handleChange={(value) => this.handleChangePlayer('playerMainCharacter', value, playerId)} character={player.playerMainCharacter}/>
+                      )}
                     </td>
                     <td>
                       {atob(playerId)}
                     </td>
-                    <td>
-                        {playerId in this.state.currentLeague.leagueAdmins ? (
-                          <button onClick={ e => this.unmakePlayerAdmin(e, playerId) }>Remove admin</button>
-                        ) : (
-                          <button onClick={ e => this.makePlayerAdmin(e, playerId) }>Make admin</button>
-                        )}
-                        <button onClick={ e => this.removePlayer(e, playerId) }>Remove user</button>
-                    </td>
+                    {isAdmin &&
+                      <td>
+                          <>
+                            {playerId in this.state.currentLeague.leagueAdmins ? (
+                              <button onClick={ e => this.unmakePlayerAdmin(e, playerId) }>Remove admin</button>
+                            ) : (
+                              <button onClick={ e => this.makePlayerAdmin(e, playerId) }>Make admin</button>
+                            )}
+                            <button onClick={ e => this.removePlayer(e, playerId) }>Remove user</button>
+                          </>
+                      </td>
+                    }
                   </tr>
                 )})}
               </tbody>

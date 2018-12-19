@@ -3,7 +3,6 @@ import { compose } from 'recompose';
 import { withFirebase } from '../Firebase';
 
 import LeagueAdminPanel from './LeagueAdminPanel';
-import LeaguePanel from './LeaguePanel';
 
 class League extends Component {
   constructor(props) {
@@ -60,7 +59,6 @@ class League extends Component {
   render() {
     return (
           <div>
-          <h1>Dashboard</h1>
             <form onSubmit={this.addLeague.bind(this)}>
               <label htmlFor="leagueName">Create a new league</label><br />
               <input name="leagueName" id="leagueName" type="text" ref={ el => this.inputLeagueName = el }/><br />
@@ -74,15 +72,14 @@ class League extends Component {
                 this.state.currentLeague !== undefined &&
                   <>
                     <h3>League: {this.state.currentLeague.leagueName}</h3>
-                    {btoa(this.state.authUser.email) in this.state.currentLeague.leagueAdmins ? (
-                      <LeagueAdminPanel 
-                        handleChangeSeason={this.props.handleChangeSeason}
-                        handleChangeLeague={this.props.handleChangeLeague}
-                        currentLeague={this.state.currentLeague} 
-                        currentLeagueId={this.state.currentLeagueId}/>
-                    ) : (
-                      <LeaguePanel currentLeague={this.state.currentLeague} currentLeagueId={this.state.currentLeagueId}/>
-                    )}
+                    
+                    <LeagueAdminPanel 
+                      handleChangeSeason={this.props.handleChangeSeason}
+                      handleChangeLeague={this.props.handleChangeLeague}
+                      currentLeague={this.state.currentLeague}
+                      currentLeagueId={this.state.currentLeagueId}
+                      authUser={this.state.authUser}
+                      />
                   </>
                 }
               </div>
