@@ -1,4 +1,4 @@
-#Ultimate-Ranking (workin' progress)
+# Ultimate-Ranking (workin' progress)
 Leaderboard system to be used for casual leagues for the game Smash Bros Ultimate. The project is powered with React and features a firebase live database.
 
 ## Run the thing
