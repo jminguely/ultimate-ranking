@@ -60,8 +60,8 @@ class NewMatchSection extends Component {
     console.log(this.state);
     axios({
       method: 'post',
-      // url: 'https://us-central1-ultimate-ranking.cloudfunctions.net/addMatch',
-      url: 'http://localhost:5001/ultimate-ranking/us-central1/addMatch',
+      url: 'https://us-central1-ultimate-ranking.cloudfunctions.net/addMatch',
+      // url: 'http://localhost:5001/ultimate-ranking/us-central1/addMatch',
       data: {
         leagueId: this.state.leagueId,
         match: {
