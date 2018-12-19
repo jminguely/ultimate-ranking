@@ -4,9 +4,7 @@ class BarChart extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      leaderBoard: props.leaderBoard,
-      players: props.players,
-      matchs: props.matchs,
+      league: props.league,
       widthCharts: 1000,
       heightCharts: 500,
     };
@@ -16,20 +14,24 @@ class BarChart extends Component {
   componentDidUpdate(prevProps) {
     if (prevProps !== this.props) {
       this.setState({ 
-        players: prevProps.players, 
-        matchs: prevProps.matchs,
-        leaderBoard: prevProps.leaderBoard
+        league: prevProps.league, 
       });
     }
   }
   
   render(){
+    const rightMargin = 200;
+    const matchsQty = Object.keys(this.state.league.leagueMatchs).length; 
+    console.log('boom');
     return (
       <svg preserveAspectRatio="xMaxYMax meet" width={this.state.widthCharts} height={this.state.heightCharts} viewBox={`0 0 ${this.state.widthCharts} ${this.state.heightCharts}`}>
         <g>
-          {this.state.matchs.map((icon, index) => (
-            <line key={index} x1={(this.state.widthCharts-150) / this.state.matchs.length * (index + 1)} y1={0} x2={(this.state.widthCharts-150) / this.state.matchs.length * (index + 1)} y2={this.state.heightCharts} strokeWidth={1} stroke="#ddd"/>
-          )
+          {Object.keys(this.state.league.leagueMatchs).map((matchKey, matchIndex) => {
+            
+            return (
+              <line key={matchIndex} x1={(this.state.widthCharts-rightMargin) / matchsQty * (matchIndex + 1)} y1={0} x2={(this.state.widthCharts-rightMargin) / matchsQty * (matchIndex + 1)} y2={this.state.heightCharts} strokeWidth={1} stroke="#ddd"/>
+            )
+          }
           )};
         </g>
         <g>
@@ -38,37 +40,42 @@ class BarChart extends Component {
           )
           )};
         </g>
-        {Object.keys(this.state.leaderBoard).map((playerKey, playerIndex) => {
-            if (this.state.leaderBoard[playerKey][this.state.leaderBoard[playerKey].length-1] > 0){ 
-              return (
-              <g key={playerIndex}>
-              <text 
-                x={this.state.widthCharts-140} 
-                y={
-                  this.state.heightCharts - this.state.leaderBoard[playerKey][this.state.leaderBoard[playerKey].length-1] / 4} 
-                fill={this.state.players[playerKey].playerColor} >
-                  {this.state.players[playerKey].playerName} ({Math.round(this.state.players[playerKey].playerScore)})
-              </text>
-              <path 
-                d={`M 5 250 
+        {Object.keys(this.state.league.leaguePlayers).map((playerKey, playerIndex) => {
+          const player = this.state.league.leaguePlayers[playerKey];
+          let lastScore = 1000;
+            return (
+            <g key={playerIndex}>
+            <text 
+              x={this.state.widthCharts - rightMargin + 10} 
+              y={
+                this.state.heightCharts - player.playerScore / 4} 
+              fill={player.playerColor} >
+                {player.playerName} ({Math.round(player.playerScore)})
+            </text>
+            <path 
+              d={`M 5 250 
                   ${
-                    this.state.leaderBoard[playerKey].map((score, matchIndex) => {
-                      if (this.state.matchs.length) {
-                        return `L ${(this.state.widthCharts-150) / this.state.matchs.length * (matchIndex + 1 )} ${this.state.heightCharts - score / 4}`
-                      }
-                    }
-                    )
-                    }
+                    Object.keys(this.state.league.leagueMatchs).map((matchKey, matchIndex) => {
+                      const match = this.state.league.leagueMatchs[matchKey];
+                      match.matchResults.forEach(rank => {
+                        if(rank.playerKey == playerKey) {
+                          lastScore = rank.newScore;
+                        }
+                      });
+                        
+                      return `L ${(this.state.widthCharts-rightMargin) / matchsQty * (matchIndex + 1 )} ${this.state.heightCharts - lastScore / 4}`
+                        
+                    })
                     
-                  `} 
-                stroke={this.state.players[playerKey].playerColor} 
-                strokeWidth="5" 
-                fill="none" 
-                strokeLinecap="round"
-              />
-              </g>
-              )
-            }
+                  }
+                `} 
+              stroke={player.playerColor} 
+              strokeWidth="5" 
+              fill="none" 
+              strokeLinecap="round"
+            />
+            </g>
+            )
           }
         )}
 

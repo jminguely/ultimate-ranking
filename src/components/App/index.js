@@ -22,8 +22,8 @@ class App extends Component {
     super(props);
 
     this.state = { 
-      currentLeagueId: "-LTg0RVknolCWJ05FbEz",
-      currentSeasonId: "",
+      currentLeagueId: "-LU-qsoBkowOJCGGRR1C",
+      currentSeasonId: "-LU2a4fZhUJNNQO5Yj7E",
     };
 
     this.handleChangeLeague = this.handleChangeLeague.bind(this);

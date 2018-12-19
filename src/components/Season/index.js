@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { compose } from 'recompose';
 import { withAuthorization } from '../Session';
 import { withFirebase } from '../Firebase';
+import BarChart from '../BarChart';
+import NewMatch from '../NewMatch';
 import { AuthUserContext } from '../Session';
 
 class Season extends Component {
@@ -43,35 +45,9 @@ class Season extends Component {
   }
 
   componentWillUnmount() {
-    this.props.firebase.leagues().off();
+    this.props.firebase.league().off();
   }
 
-  addLeague(e){
-    e.preventDefault();
-    this.props.firebase.leagues().push( {
-      "leagueName": this.inputLeagueName.value,
-      "leagueAdmins": {
-        [this.state.authUser.uid]: true
-      }
-    } );
-    this.inputLeagueName.value = '';
-  }
-
-  addPlayer(leagueId, e){
-    e.preventDefault();
-    this.props.firebase.leaguePlayers(`${leagueId}`).push( {
-      "playerName": this.inputPlayerName.value,
-    } );
-    this.inputPlayerName.value = '';
-  }
-
-  addSeason(leagueId, e){
-    e.preventDefault();
-    this.props.firebase.leagueSeasons(`${leagueId}`).push( {
-      "seasonName": this.inputSeasonName.value,
-    } );
-    this.inputSeasonName.value = '';
-  }
 
   handleChange(event){
     this.setState({currentSeason: event.target.value});
@@ -82,63 +58,58 @@ class Season extends Component {
       <AuthUserContext.Consumer>
         {authUser =>
           <div>
-          <h1>Season</h1>
-          {
-            this.state.currentLeague &&
-            <>
-              <h2>League: {this.state.currentLeague.leagueName}</h2>
-              {this.state.currentSeasonId && this.state.currentSeason &&
-                <div>
-                  <h2>Season: {this.state.currentSeason.seasonName}</h2>
+            <h1>Season</h1>
+            {
+              this.state.currentLeague &&
+              <>
+                <h2>League: {this.state.currentLeague.leagueName}</h2>
+                {this.state.currentSeasonId && this.state.currentSeason &&
+                  <div>
+                    <h2>Season: {this.state.currentSeason.seasonName}</h2>
 
-                  Add match
+                    <NewMatch 
+                      leagueId={this.state.currentLeagueId}
+                      league={this.state.currentLeague}
+                    />
 
-                  Show barchart
-                </div>
-
-                
-              }
-            </>
-          }
-          
-          {/* {this.state.currentLeague.leagueName} */}
-            <div>
-              {/* {this.state.currentLeague !== "" && this.state.leagues[this.state.currentLeague] !== undefined &&
-                <>
-                  <h3>League: {this.state.leagues[this.state.currentLeague].leagueName}</h3>
-                  {
-                    this.state.leagues[this.state.currentLeague].leaguePlayers && (
-                    <>
-                      <h3>Seasons</h3>
-                      <form onSubmit={this.addSeason.bind(this, this.state.currentLeague)}>
-                        <label htmlFor="seasonName">Launch a new season</label><br />
-                        <input name="seasonName" id="seasonName" type="text" ref={ el => this.inputSeasonName = el }/>
-                        <input type="submit"/>
-                      </form>
-                      <h2>Show me a season</h2>
-                        <select name="currentSeasonSelect" value={this.state.currentSeason} onChange={this.handleChange}>
-                          {JSON.stringify(this.state.leagues[this.state.currentLeague].leagueSeasons)}
-                          <option value=""></option>
-                          {this.state.leagues[this.state.currentLeague].leagueSeasons && Object.keys(this.state.leagues[this.state.currentLeague].leagueSeasons).map(leagueId=> {
-                          const league = this.state.leagues[this.state.currentLeague].leagueSeasons[leagueId];
-                            return(
-                              <option key={leagueId} value={leagueId}>
-                                {league.seasonName}
-                              </option>
-                            )
-                          })}
-                        </select>
-                        {this.state.currentSeason !== "" && this.state.leagues[this.state.currentLeague].leagueSeasons[this.state.currentSeason] !== undefined &&
-                          <>
-                            <h3>League: {this.state.leagues[this.state.currentLeague].leagueSeasons[this.state.currentSeason].seasonName}</h3>
-                          </>
+                    <hr />
+                    <h3>Matchs</h3>
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Datetime</th>
+                          <th>Classement</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        { /* Render the list of matchs */
+                          Object.keys(this.state.currentLeague.leagueMatchs).map( match => (
+                            <tr key={match}>
+                            
+                              <td>{this.state.currentLeague.leagueMatchs[match].matchDate}</td>
+                              <td>
+                                <ol>
+                                  { this.state.currentLeague.leagueMatchs[match].matchResults.map( rank => (
+                                    
+                                    <li key={rank.playerKey}>{this.state.currentLeague.leaguePlayers[rank.playerKey].playerName} ({Math.floor(rank.prevScore)} -> {Math.floor(rank.newScore)})</li>
+                                  ) )
+                                  }
+                                </ol>
+                              </td>
+                            </tr>
+                          ) )
                         }
-                    </>
-                    )
-                  }
-                </>
-              } */}
-            </div>
+                      </tbody>
+                    </table>
+                    <br />
+                    <hr />
+                    <br />
+                    <h3>Barcharts</h3>
+                    <BarChart league={this.state.currentLeague}/>
+                  </div>
+                }
+              </>
+            }
           </div>
           }
       </AuthUserContext.Consumer>

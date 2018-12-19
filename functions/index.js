@@ -14,10 +14,10 @@ exports.addMatch = functions.https.onRequest((req, res) => {
     message: 'Not allowed'
    })
   }
-  const match = JSON.parse(req.body)
+  const data = JSON.parse(req.body)
+  console.log(data);
 
-  const playersRef = admin.database().ref('/players');
-
+  const playersRef = admin.database().ref(`/leagues/${data.leagueId}/leaguePlayers`);
   const players = [];
   
   playersRef.once('value', function(snapshot) {
@@ -27,17 +27,17 @@ exports.addMatch = functions.https.onRequest((req, res) => {
       players[childKey] = childData;
     });
   }).then(() => {
-    match.currentScores = [];
+    data.currentScores = [];
 
     let playerAlreadyRanked = [];
     let ratio = 0.1;
 
-    match.matchResults.forEach((playerA, indexPlayerA) => {
-      if(Object.keys(match.matchResults[indexPlayerA]).length === 0) {
-        match.matchResults.splice(indexPlayerA, 1);
+    data.match.matchResults.forEach((playerA, indexPlayerA) => {
+      if(Object.keys(data.match.matchResults[indexPlayerA]).length === 0) {
+        data.match.matchResults.splice(indexPlayerA, 1);
       } else {
-        match.matchResults[indexPlayerA]['prevScore'] = players[playerA.playerKey].playerScore;
-        match.matchResults.forEach((playerB, indexPlayerB) => {
+        data.match.matchResults[indexPlayerA]['prevScore'] = players[playerA.playerKey].playerScore;
+        data.match.matchResults.forEach((playerB, indexPlayerB) => {
           if (playerA.playerKey !== playerB.playerKey && playerAlreadyRanked.includes(playerB.playerKey)) {
 
             const misePlayerA = ratio * players[playerA.playerKey].playerScore;
@@ -56,16 +56,17 @@ exports.addMatch = functions.https.onRequest((req, res) => {
       }
     });
 
-    //Save the new scores
-    match.matchResults.forEach((player, index) => {
-      match.matchResults[index]['newScore'] = players[player.playerKey].playerScore;
+
+    // Save the new scores
+    data.match.matchResults.forEach((player, index) => {
+      data.match.matchResults[index]['newScore'] = players[player.playerKey].playerScore;
 
       var updates = {};
-      updates[`/players/${player.playerKey}/playerScore`] = players[player.playerKey].playerScore
+      updates[`/leagues/${data.leagueId}/leaguePlayers/${player.playerKey}/playerScore`] = players[player.playerKey].playerScore
       admin.database().ref().update(updates)
     });
 
-    return admin.database().ref('/matchs').push(match).then((snapshot) => {'success'});
+    return admin.database().ref(`/leagues/${data.leagueId}/leagueMatchs`).push(data.match).then((snapshot) => {'success'});
   });
 
   }, (error) => {
